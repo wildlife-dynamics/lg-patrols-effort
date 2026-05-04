@@ -163,7 +163,7 @@
           "additionalProperties": false,
           "properties": {
             "var": {
-              "title": "",
+              "title": "Category",
               "type": "string",
               "oneOf": [
                 {
@@ -178,7 +178,8 @@
                   "const": "patrol_serial_number",
                   "title": "Patrol Serial Number"
                 }
-              ]
+              ],
+              "default": "patrol_type"
             }
           },
           "required": [

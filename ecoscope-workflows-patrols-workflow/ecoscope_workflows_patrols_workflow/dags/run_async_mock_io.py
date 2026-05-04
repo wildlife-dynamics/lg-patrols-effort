@@ -122,6 +122,9 @@ from ecoscope_workflows_ext_custom.tasks.results import (
 )
 from ecoscope_workflows_ext_custom.tasks.results import draw_map as draw_map
 from ecoscope_workflows_ext_custom.tasks.transformation import (
+    decompose_datetime as decompose_datetime,
+)
+from ecoscope_workflows_ext_custom.tasks.transformation import (
     drop_null_geometry as drop_null_geometry_1,
 )
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import (
@@ -161,9 +164,6 @@ from ecoscope_workflows_ext_lion_guardians.tasks import (
 )
 from ecoscope_workflows_ext_lion_guardians.tasks import (
     create_guardians_ctx_cover as create_guardians_ctx_cover,
-)
-from ecoscope_workflows_ext_lion_guardians.tasks import (
-    extract_date_parts as extract_date_parts,
 )
 from ecoscope_workflows_ext_lion_guardians.tasks import (
     generate_guardians_report as generate_guardians_report,
@@ -3657,7 +3657,7 @@ def main(params: Params):
             },
         ),
         "add_month_name": Node(
-            async_task=extract_date_parts.validate()
+            async_task=decompose_datetime.validate()
             .set_task_instance_id("add_month_name")
             .handle_errors()
             .with_tracing()
@@ -3670,12 +3670,12 @@ def main(params: Params):
             )
             .set_executor("lithops"),
             partial={
-                "date_column": "extra__patrol_start_time",
-                "parts": [
-                    "month",
-                    "day",
+                "datetime_column": "extra__patrol_start_time",
+                "components": [
                     "month_name",
                 ],
+                "remove_source": False,
+                "column_prefix": "time",
             }
             | (params_dict.get("add_month_name") or {}),
             method="mapvalues",
@@ -3699,7 +3699,7 @@ def main(params: Params):
             .set_executor("lithops"),
             partial={
                 "groupby_cols": [
-                    "month_name",
+                    "time_month_name",
                 ],
                 "reset_index": True,
                 "summary_params": [

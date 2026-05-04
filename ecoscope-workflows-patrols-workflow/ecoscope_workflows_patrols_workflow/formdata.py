@@ -53,7 +53,7 @@ class SetPatrolTrajColorColumn(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    var: str = Field(..., title="")
+    var: str = Field(..., title="Category")
 
 
 class TrajectoryCategory(BaseModel):

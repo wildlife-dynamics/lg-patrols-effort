@@ -43,7 +43,8 @@ rjsf-overrides:
 
       - const: patrol_serial_number
         title: Patrol Serial Number
-
+    Trajectory Category.properties.set_patrol_traj_color_column.properties.var.title: Category
+    Trajectory Category.properties.set_patrol_traj_color_column.properties.var.default: patrol_type
   $defs:
     ValueGrouper.oneOf:
       - const: patrol_type
@@ -1576,13 +1577,13 @@ workflow:
   # add month name , month on trajs -- month_stats
   - name: Add month name on trajs
     id: add_month_name
-    task: extract_date_parts
+    task: decompose_datetime
     partial:
-      date_column: extra__patrol_start_time
-      parts:
-        - month
-        - day
+      datetime_column: extra__patrol_start_time
+      components:
         - month_name
+      remove_source: false 
+      column_prefix: time
     mapvalues:
       argnames: df
       argvalues: ${{ workflow.split_patrol_traj_groups.return }}
@@ -1593,7 +1594,7 @@ workflow:
     task: summarize_df
     partial:
       groupby_cols:
-        - month_name
+        - time_month_name
       reset_index: true
       summary_params:
         - display_name: no_of_patrols
