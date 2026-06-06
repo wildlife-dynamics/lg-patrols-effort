@@ -126,6 +126,9 @@ from ecoscope_workflows_ext_custom.tasks.transformation import (
 from ecoscope_workflows_ext_custom.tasks.transformation import (
     drop_null_geometry as drop_null_geometry_1,
 )
+from ecoscope_workflows_ext_custom.tasks.transformation import (
+    select_columns as select_columns,
+)
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import (
     calculate_linear_time_density as calculate_linear_time_density,
 )
@@ -1536,6 +1539,26 @@ def main(params: Params):
         .mapvalues(argnames=["df"], argvalues=speed_val_with_unit)
     )
 
+    filter_patrol_columns = (
+        select_columns.validate()
+        .set_task_instance_id("filter_patrol_columns")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            columns=["geometry"],
+            raise_on_missing=False,
+            **(params_dict.get("filter_patrol_columns") or {}),
+        )
+        .mapvalues(argnames=["df"], argvalues=patrol_traj_rename_columns)
+    )
+
     patrol_traj_map_layers = (
         create_path_layer.validate()
         .set_task_instance_id("patrol_traj_map_layers")
@@ -1569,7 +1592,7 @@ def main(params: Params):
             },
             **(params_dict.get("patrol_traj_map_layers") or {}),
         )
-        .mapvalues(argnames=["geodataframe"], argvalues=patrol_traj_rename_columns)
+        .mapvalues(argnames=["geodataframe"], argvalues=filter_patrol_columns)
     )
 
     merge_static_traj_layers = (

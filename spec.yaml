@@ -695,6 +695,17 @@ workflow:
       argnames: df
       argvalues: ${{ workflow.speed_val_with_unit.return }}
 
+  - name: Filter patrol columns to be rendered on the map 
+    id: filter_patrol_columns 
+    task: select_columns 
+    partial: 
+      columns: 
+        - geometry
+      raise_on_missing: false 
+    mapvalues: 
+      argnames: df 
+      argvalues: ${{ workflow.patrol_traj_rename_columns.return }}
+
   - name: Create map layer for each Patrol Trajectories group
     id: patrol_traj_map_layers
     task: create_path_layer
@@ -724,7 +735,7 @@ workflow:
             color: "#008b8b"
     mapvalues:
       argnames: geodataframe
-      argvalues: ${{ workflow.patrol_traj_rename_columns.return }}
+      argvalues: ${{ workflow.filter_patrol_columns.return }}
 
   - name: Combine styled layers with trajectories
     id: merge_static_traj_layers

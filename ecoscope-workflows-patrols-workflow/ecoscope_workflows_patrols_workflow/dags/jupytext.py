@@ -93,6 +93,9 @@ from ecoscope_workflows_ext_custom.tasks.transformation import (
 from ecoscope_workflows_ext_custom.tasks.transformation import (
     drop_null_geometry as drop_null_geometry_1,
 )
+from ecoscope_workflows_ext_custom.tasks.transformation import (
+    select_columns as select_columns,
+)
 from ecoscope_workflows_ext_ecoscope.tasks.analysis import (
     calculate_linear_time_density as calculate_linear_time_density,
 )
@@ -2227,6 +2230,36 @@ patrol_traj_rename_columns = (
 
 
 # %% [markdown]
+# ## Filter patrol columns to be rendered on the map
+
+# %%
+# parameters
+
+filter_patrol_columns_params = dict()
+
+# %%
+# call the task
+
+
+filter_patrol_columns = (
+    select_columns.set_task_instance_id("filter_patrol_columns")
+    .handle_errors()
+    .with_tracing()
+    .skipif(
+        conditions=[
+            any_is_empty_df,
+            any_dependency_skipped,
+        ],
+        unpack_depth=1,
+    )
+    .partial(
+        columns=["geometry"], raise_on_missing=False, **filter_patrol_columns_params
+    )
+    .mapvalues(argnames=["df"], argvalues=patrol_traj_rename_columns)
+)
+
+
+# %% [markdown]
 # ## Create map layer for each Patrol Trajectories group
 
 # %%
@@ -2270,7 +2303,7 @@ patrol_traj_map_layers = (
         },
         **patrol_traj_map_layers_params,
     )
-    .mapvalues(argnames=["geodataframe"], argvalues=patrol_traj_rename_columns)
+    .mapvalues(argnames=["geodataframe"], argvalues=filter_patrol_columns)
 )
 
 
