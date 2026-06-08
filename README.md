@@ -25,7 +25,7 @@ Before running the workflow, ensure you have:
 - Access to an **EarthRanger** instance with a configured data source
 - The patrol types and event types you want to analyse (leave blank to include all)
 
-> The three spatial boundary files (group ranch boundaries, conflict hotspot areas, and protected areas) are downloaded automatically from Dropbox — no local copies are required.
+> The two spatial boundary files (group ranch boundaries and conflict hotspot areas) are downloaded automatically from Dropbox — no local copies are required.
 
 ---
 
@@ -94,7 +94,7 @@ All patrol tracks, events, and metrics are computed within this window.
 
 ---
 
-### Step 5 — Set Groupers, Connect to ER, and Set Patrol Parameters
+### Step 5 — Set Groupers, Connect to EarthRanger, and Set Patrol Parameters
 
 Scroll down to configure three sections.
 
@@ -108,9 +108,9 @@ Groupers control how the workflow partitions data for per-group outputs. If left
 | Patrol Serial Number | One output per patrol serial |
 | Patrol Subject | One output per guardian ranger |
 
-**Connect to ER**
+**Connect to EarthRanger**
 
-Select the EarthRanger data source configured in Step 2 from the **Data Source** dropdown.
+Select the EarthRanger data source configured in Step 2 from the **Connect to EarthRanger** dropdown.
 
 **Set patrol and patrol events params**
 
@@ -146,12 +146,12 @@ These parameters remove GPS noise and biologically unrealistic movements before 
 
 | Field | Default | Description |
 |-------|---------|-------------|
-| Minimum Segment Length (m) | `0.001` | Discard segments shorter than this distance |
+| Minimum Segment Length (m) | `10` | Discard segments shorter than this distance |
 | Maximum Segment Length (m) | `100000` | Discard segments longer than this distance |
-| Minimum Segment Duration (s) | `1` | Discard segments shorter than this duration |
-| Maximum Segment Duration (s) | `172800` | Discard segments longer than this duration (48 hours) |
-| Minimum Segment Speed (km/h) | `0.01` | Discard segments below this average speed |
-| Maximum Segment Speed (km/h) | `500` | Discard segments above this average speed |
+| Minimum Segment Duration (s) | `10` | Discard segments shorter than this duration |
+| Maximum Segment Duration (s) | `21600` | Discard segments longer than this duration (6 hours) |
+| Minimum Segment Speed (km/h) | `1` | Discard segments below this average speed |
+| Maximum Segment Speed (km/h) | `7` | Discard segments above this average speed |
 
 **Filter patrol events** *(Advanced Configurations)*
 
@@ -176,7 +176,7 @@ Controls the resolution of the patrol coverage raster. Leave at defaults for mos
 Once all parameters are configured, click **Submit**. The runner will:
 
 1. Pull patrol tracks and events from EarthRanger for the specified time range.
-2. Download the static boundary files (group ranches, conflict hotspots, protected areas).
+2. Download the static boundary files (group ranches, conflict hotspots).
 3. Convert observations to relocations and build trajectory segments.
 4. Generate the Patrol Events, Patrol Trajectories, and Linear Time Density maps.
 5. Compute per-guardian, patrol type, event type, and monthly summary tables.

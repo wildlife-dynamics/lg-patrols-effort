@@ -182,19 +182,18 @@ def build():
         ),
 
         sp(6), h2("2.3 Static Geodata Files"),
-        p("Three boundary datasets are downloaded from Dropbox and cached locally:"),
+        p("Two boundary datasets are downloaded from Dropbox and cached locally:"),
         make_table(
             [
                 [c("Dataset"),               c("File"),                          c("Purpose")],
                 [c("Group Ranch Boundaries"), c("lg_group_ranch_boundaries.gpkg"), c("Community ranch polygons in Amboseli")],
                 [c("Conflict Hotspot Areas"), c("lg_conflict_hotspots.gpkg"),      c("Known human–lion conflict hotspot features")],
-                [c("Protected Areas"),        c("lg_protected_areas.gpkg"),        c("National parks and reserves")],
             ],
             [4*cm, 5*cm, 7.5*cm],
         ),
         sp(4),
         p(
-            "All three files use <code>overwrite_existing: false</code> (3 retries). "
+            "Both files use <code>overwrite_existing: false</code> (3 retries). "
             "After loading, each is reprojected to <b>EPSG:4326</b> and annotated with "
             "its geometry type before layer creation."
         ),
@@ -243,12 +242,28 @@ def build():
         bullet("(0.0, 0.0) — null-island artefact"),
         bullet("(1.0, 1.0) — common default / test value"),
         p(
+            "A daytime filter (<code>filter_daytime_patrols</code>) is applied before "
+            "trajectory construction, retaining only fixes between 06:00 and 19:00 local "
+            "time to exclude night-time GPS drift. "
             "<code>relocations_to_trajectory</code> then connects consecutive fixes "
             "per patrol into LineString segments, adding <code>dist_meters</code>, "
             "<code>speed_kmhr</code>, <code>segment_start</code>, and "
-            "<code>segment_end</code>. Trajectories are persisted as "
-            "<code>trajectories.geoparquet</code>."
+            "<code>segment_end</code>. The following segment filter is applied:"
         ),
+        make_table(
+            [
+                [c("Filter parameter"),       c("Default"), c("Description")],
+                [c("min_length_meters"),       c("10"),      c("Discard segments shorter than 10 m")],
+                [c("max_length_meters"),       c("100 000"), c("Discard segments longer than 100 km")],
+                [c("min_time_secs"),           c("10"),      c("Discard segments shorter than 10 s")],
+                [c("max_time_secs"),           c("21 600"),  c("Discard segments longer than 6 hours")],
+                [c("min_speed_kmhr"),          c("1"),       c("Discard segments below 1 km/h average speed")],
+                [c("max_speed_kmhr"),          c("7"),       c("Discard segments above 7 km/h average speed")],
+            ],
+            [4.5*cm, 2*cm, 10*cm],
+        ),
+        sp(4),
+        p("Trajectories are persisted as <code>trajectories.geoparquet</code>."),
 
         sp(4), h2("3.2 Patrol Events"),
         p(
@@ -302,7 +317,7 @@ def build():
     story += [
         sp(4), h1("4. Static Map Layers"), hr(),
         p(
-            "Four static layers are built once and composited onto every group-level "
+            "Three static layers are built once and composited onto every group-level "
             "map to provide spatial context."
         ),
 
@@ -310,12 +325,10 @@ def build():
         make_table(
             [
                 [c("Layer"),               c("Colour (RGB)"),             c("Opacity"), c("Filled"), c("Notes")],
-                [c("Group Ranch Boundaries"), c("(169, 169, 169) grey"),   c("55 %"),    c("No"),
-                 c("Outline only, line width 4.5")],
-                [c("Conflict Hotspots"),   c("(220, 20, 60) crimson"),    c("75 %"),    c("Yes"),
-                 c("Point radius 2.55, line width 1.95")],
-                [c("Protected Areas"),     c("(77, 102, 0) dark green"),  c("35 %"),    c("Yes"),
-                 c("Line width 1.95")],
+                [c("Group Ranch Boundaries"), c("(169, 169, 169) grey"),   c("45 %"),    c("No"),
+                 c("Outline only, line width 1.25")],
+                [c("Conflict Hotspots"),   c("(220, 20, 60) crimson"),    c("45 %"),    c("Yes"),
+                 c("Point radius 2.05, line width 1.25")],
                 [c("Hotspot Text Labels"), c("(20, 20, 20) near-black"),  c("—"),       c("—"),
                  c("Arial, 1 000 m base, 40–75 px clamp, centroid-anchored")],
             ],
@@ -334,7 +347,7 @@ def build():
             "Point radius is 5 px at 75 % opacity with stroked outlines. "
             "Before rendering, geometric outliers are removed via "
             "<code>exclude_geom_outliers</code> (z-threshold: 3) and null geometries "
-            "are dropped. The event layer is combined with the four static boundary "
+            "are dropped. The event layer is combined with the three static boundary"
             "layers. The map is auto-zoomed to the event extent "
             "(expansion factor 1.05) and persisted as HTML "
             "(suffix: <code>events</code>), then converted to PNG at 2× scale "
@@ -358,7 +371,7 @@ def build():
         ),
         sp(4),
         p(
-            "The path layer is combined with the four static layers and auto-zoomed "
+            "The path layer is combined with the three static layers and auto-zoomed "
             "to the trajectory extent (expansion factor 1.05). The map is persisted as "
             "HTML (suffix: <code>patrol_trajectories</code>). PNG screenshot generation "
             "is available but disabled by default in the current workflow version."
@@ -598,8 +611,8 @@ def build():
             [
                 [c("Stage"),              c("Tasks")],
                 [c("Setup"),              c("ER connection, time range, timezone, groupers, base maps")],
-                [c("Geodata download"),   c("3 boundary files + 2 Word templates from Dropbox")],
-                [c("Static layers"),      c("Ranch, hotspot, protected area, hotspot text layers")],
+                [c("Geodata download"),   c("2 boundary files + 2 Word templates from Dropbox")],
+                [c("Static layers"),      c("Ranch, hotspot, hotspot text layers")],
                 [c("Patrol ingest"),      c("Params → prefetch → observations → events → rename → convert TZ")],
                 [c("Trajectories"),       c("Relocations → trajectories → temporal index → rename → split groups")],
                 [c("Events branch"),      c("Filter → temporal index → colormap → rename → outlier removal → scatter layer → map → HTML → PNG → widget")],
