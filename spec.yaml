@@ -242,7 +242,7 @@ workflow:
       raise_on_empty: false
       truncate_to_time_range: true
       sub_page_size: 200
-      patrols_overlap_daterange: false
+      patrols_overlap_daterange: true
       patrol_types: ["routine_patrol"]
 
   - name: Prefetch patrols

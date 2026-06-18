@@ -905,7 +905,7 @@ def main(params: Params):
                 "raise_on_empty": False,
                 "truncate_to_time_range": True,
                 "sub_page_size": 200,
-                "patrols_overlap_daterange": False,
+                "patrols_overlap_daterange": True,
                 "patrol_types": [
                     "routine_patrol",
                 ],
