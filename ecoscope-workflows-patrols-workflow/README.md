@@ -5,35 +5,29 @@
 
 ```yaml
 # fingerprint:
-artifacts_sha256_basic: 0320da5b1b4336ae60a5b2e8db74479fcd32141b84faca41072b1c7023bd36de
-artifacts_sha256_strict: 635c817e5210382a2ccf7b5efffc1020ad796c37cbc689cb014da95e1ff9c235
+artifacts_sha256_basic: b128bac19f3671f71ad3ef0b86b4d39d4388f6cd5a1d01ab1f7643026b41abc4
+artifacts_sha256_strict: b926e098c1e03f352c7be35f590b821950bbfec032fed5ea8e6e8cdee4e795e2
 installed_requirements:
 - channel: https://repo.prefix.dev/ecoscope-workflows/
-  name: ecoscope-workflows-core
-  version: {version: ==0.22.17}
-- channel: https://repo.prefix.dev/ecoscope-workflows/
-  name: ecoscope-workflows-ext-ecoscope
-  version: {version: ==0.22.17}
+  name: ecoscope-platform
+  version: {version: ==2.15.1}
 - channel: https://repo.prefix.dev/ecoscope-workflows-custom/
   name: ecoscope-workflows-ext-custom
-  version: {version: ==0.0.40}
+  version: {version: ==0.1.0rc14}
 - channel: https://repo.prefix.dev/ecoscope-workflows-custom/
   name: ecoscope-workflows-ext-ste
-  version: {version: ==0.0.18}
-- channel: https://repo.prefix.dev/ecoscope-workflows-custom/
-  name: ecoscope-workflows-ext-mnc
-  version: {version: ==0.0.7}
-- channel: https://repo.prefix.dev/ecoscope-workflows-custom/
-  name: ecoscope-workflows-ext-icf
-  version: {version: ==0.0.0}
-- channel: https://repo.prefix.dev/ecoscope-workflows-custom/
-  name: ecoscope-workflows-ext-big-life
-  version: {version: ==0.0.8}
+  version: {version: ==0.0.0rc1}
 - channel: https://repo.prefix.dev/ecoscope-workflows-custom/
   name: ecoscope-workflows-ext-lion-guardians
-  version: {version: ==0.0.7}
-params_sha256: 6fe49180c98ff0e96827dfd6bc52fbb269c2ceccae606869f4d2a3a9feaa0d2c
-spec_sha256: c723ae0a3947d3c0b14f61691f2227bdc9baea25c4880a002eb5a791b49ca8bd
+  version: {version: ==0.0.0rc1}
+- channel: conda-forge
+  name: pydeck
+  version: {version: ==0.9.2}
+- channel: conda-forge
+  name: opentelemetry-sdk
+  version: {version: ==1.44.0}
+params_sha256: 8aa48859aa8446bba225adf52c649731dea9bc91ccb7434f5d87ab8513c46a3c
+spec_sha256: 12b505aeee879f81c578ed089085d1a8d57b6e5b90e30031c79641f8607ca595
 
 ```
 
