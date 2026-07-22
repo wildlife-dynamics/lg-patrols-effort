@@ -170,40 +170,47 @@ def build():
         ),
 
         sp(4), h2("2.2 Groupers"),
-        p("Three grouper fields are available via <code>set_groupers</code>:"),
+        p("Four grouper fields are available via <code>set_groupers</code> (default: none, a single combined view):"),
         make_table(
             [
-                [c("Grouper field"),          c("EarthRanger source"),        c("Typical use")],
-                [c("patrol_type"),            c("patrol.patrol_type.value"),  c("One output per patrol type")],
-                [c("patrol_serial_number"),   c("patrol.serial_number"),      c("One output per patrol serial")],
-                [c("patrol_subject"),         c("patrol.leader / members"),   c("One output per guardian ranger")],
+                [c("Grouper field"),          c("Source column"),                    c("Typical use")],
+                [c("patrol_type"),            c("extra__patrol_type__value"),        c("One output per patrol type")],
+                [c("patrol_serial_number"),   c("extra__patrol_serial_number"),      c("One output per patrol serial")],
+                [c("patrol_status"),          c("extra__patrol_status"),             c("One output per patrol status")],
+                [c("patrol_subject"),         c("extra__patrol_subject"),            c("One output per guardian ranger")],
             ],
-            [3.8*cm, 4.8*cm, 7.9*cm],
+            [3.8*cm, 5.5*cm, 6.7*cm],
         ),
 
-        sp(6), h2("2.3 Static Geodata Files"),
-        p("Two boundary datasets are downloaded from Dropbox and cached locally:"),
+        sp(6), h2("2.3 Study Area Layers"),
+        p(
+            "Unlike some sibling Lion Guardians workflows, the study-area boundaries here are "
+            "<b>not</b> downloaded from Dropbox — they are fetched live from the connected "
+            "<b>EarthRanger</b> instance via <code>get_spatial_features</code>, querying two "
+            "feature types:"
+        ),
         make_table(
             [
-                [c("Dataset"),               c("File"),                          c("Purpose")],
-                [c("Group Ranch Boundaries"), c("lg_group_ranch_boundaries.gpkg"), c("Community ranch polygons in Amboseli")],
-                [c("Conflict Hotspot Areas"), c("lg_conflict_hotspots.gpkg"),      c("Known human–lion conflict hotspot features")],
+                [c("Feature type"),           c("Style"),                                    c("Purpose")],
+                [c("Conservancies"),          c("Fill #8fbc8b, 75% opacity, 1.75 px stroke"), c("Conservancy boundary polygons")],
+                [c("Group Ranch Boundaries"), c("Unfilled, black 1.25 px stroke outline"),     c("Community ranch boundary polygons")],
             ],
-            [4*cm, 5*cm, 7.5*cm],
+            [4.5*cm, 6.5*cm, 5*cm],
         ),
         sp(4),
         p(
-            "Both files use <code>overwrite_existing: false</code> (3 retries). "
-            "After loading, each is reprojected to <b>EPSG:4326</b> and annotated with "
-            "its geometry type before layer creation."
+            "There is no Dropbox-downloaded boundary file and no separate conflict-hotspot "
+            "layer in this workflow — only the org logo and the two Word templates below "
+            "come from Dropbox."
         ),
 
-        sp(4), h2("2.4 Word Document Templates"),
+        sp(4), h2("2.4 Word Document Templates &amp; Logo"),
         make_table(
             [
-                [c("Template file"),                  c("Purpose")],
-                [c("patrol_guardians_cover_page.docx"), c("Report cover page — period, preparer")],
-                [c("custom_patrol_template.docx"),      c("Per-grouper section — maps, charts, and summary tables")],
+                [c("File"),                             c("Purpose")],
+                [c("patrol_guardians_cover_page.docx"), c("Report cover page template — period, preparer")],
+                [c("custom_patrol_template.docx"),      c("Per-grouper section template — maps, charts, and summary tables")],
+                [c("lion-guardians.png"),               c("Organisation logo, embedded on the cover page")],
             ],
             [6.5*cm, 10*cm],
         ),
@@ -300,16 +307,16 @@ def build():
             "over these partitions via <code>mapvalues</code>."
         ),
 
-        sp(4), h2("3.4 Trajectory Colormap"),
+        sp(4), h2("3.4 Trajectory Colour &amp; Event Colormap"),
         p(
-            "A user-selectable <b>Trajectory Category</b> field determines how patrol "
-            "tracks are coloured. Available options are <code>patrol_type</code>, "
-            "<code>patrol_subject</code>, and <code>patrol_serial_number</code>. "
-            "<code>apply_color_map</code> maps the chosen column to the "
-            "<b>Paired</b> colormap, writing the result to "
-            "<code>patrol_traj_colormap</code>. "
-            "Similarly, patrol events are coloured by <code>event_type</code> using "
-            "the <b>Accent</b> colormap (<code>event_type_colormap</code>)."
+            "Patrol trajectories are <b>not</b> coloured by a user-selectable field — every "
+            "track segment on the Trajectories map uses a single fixed colour "
+            "(<code>#008b8b</code>, dark cyan), reflected in the map legend as a static "
+            "&ldquo;Foot patrols&rdquo; entry. Patrol events, by contrast, "
+            "<b>are</b> colour-mapped: <code>apply_color_map</code> maps "
+            "<code>event_type</code> to the <b>Accent</b> colormap, writing the result to "
+            "<code>event_type_colormap</code>, which drives both the Patrol Events map and "
+            "the bar/pie charts."
         ),
     ]
 
@@ -317,22 +324,20 @@ def build():
     story += [
         sp(4), h1("4. Static Map Layers"), hr(),
         p(
-            "Three static layers are built once and composited onto every group-level "
-            "map to provide spatial context."
+            "Two static layers, fetched live from EarthRanger (see &sect;2.3), are built "
+            "once and composited onto every group-level map to provide spatial context."
         ),
 
         h2("4.1 Layer Styles"),
         make_table(
             [
-                [c("Layer"),               c("Colour (RGB)"),             c("Opacity"), c("Filled"), c("Notes")],
-                [c("Group Ranch Boundaries"), c("(169, 169, 169) grey"),   c("45 %"),    c("No"),
-                 c("Outline only, line width 1.25")],
-                [c("Conflict Hotspots"),   c("(220, 20, 60) crimson"),    c("45 %"),    c("Yes"),
-                 c("Point radius 2.05, line width 1.25")],
-                [c("Hotspot Text Labels"), c("(20, 20, 20) near-black"),  c("—"),       c("—"),
-                 c("Arial, 1 000 m base, 40–75 px clamp, centroid-anchored")],
+                [c("Layer"),                  c("Colour"),          c("Opacity"), c("Filled"), c("Notes")],
+                [c("Conservancies"),          c("#8fbc8b (dark sea green)"), c("75 %"), c("Yes"),
+                 c("Stroke width 1.75 px, same colour as fill")],
+                [c("Group Ranch Boundaries"), c("Black outline"),   c("0 % fill"), c("No"),
+                 c("Outline only, stroke width 1.25 px")],
             ],
-            [3.8*cm, 3.8*cm, 2*cm, 1.8*cm, 5.1*cm],
+            [4*cm, 4.5*cm, 2*cm, 1.8*cm, 4.2*cm],
         ),
     ]
 
@@ -344,37 +349,37 @@ def build():
         p(
             "<code>create_scatterplot_layer</code> renders each patrol event as a point "
             "marker, coloured by <code>event_type_colormap</code> (Accent colormap). "
-            "Point radius is 5 px at 75 % opacity with stroked outlines. "
+            "Point radius is 2.5 px at 75 % opacity with stroked, black outlines. "
             "Before rendering, geometric outliers are removed via "
             "<code>exclude_geom_outliers</code> (z-threshold: 3) and null geometries "
-            "are dropped. The event layer is combined with the three static boundary"
-            "layers. The map is auto-zoomed to the event extent "
-            "(expansion factor 1.05) and persisted as HTML "
-            "(suffix: <code>events</code>), then converted to PNG at 2× scale "
+            "are dropped. The event layer is combined with the two study-area static "
+            "layers (&sect;4.1). The map is auto-zoomed to the event extent and persisted "
+            "as HTML (suffix: <code>events</code>), then converted to PNG at 2× scale "
             "with a 40 s tile-load wait."
         ),
 
         sp(4), h2("5.2 Patrol Trajectories Map"),
         p(
-            "<code>create_path_layer</code> renders patrol track segments coloured by "
-            "the user-selected Trajectory Category column:"
+            "<code>create_path_layer</code> renders patrol track segments with a fixed "
+            "style (not driven by any colormap):"
         ),
         make_table(
             [
                 [c("Property"),     c("Value")],
-                [c("Colour"),       c("patrol_traj_colormap (Paired colormap, per-category)")],
-                [c("Width"),        c("1.85 px, min 2 px, max 6 px (screen-space pixels)")],
+                [c("Colour"),       c("#008b8b, dark cyan (fixed for all patrols)")],
+                [c("Width"),        c("2.25 px, min 2 px, max 8 px (screen-space pixels)")],
                 [c("Cap / Join"),   c("Rounded")],
-                [c("Opacity"),      c("55 %")],
+                [c("Opacity"),      c("45 %")],
             ],
             [4.5*cm, 12*cm],
         ),
         sp(4),
         p(
-            "The path layer is combined with the three static layers and auto-zoomed "
-            "to the trajectory extent (expansion factor 1.05). The map is persisted as "
-            "HTML (suffix: <code>patrol_trajectories</code>). PNG screenshot generation "
-            "is available but disabled by default in the current workflow version."
+            "The path layer is combined with the two study-area static layers and "
+            "auto-zoomed to the trajectory extent. The map is persisted as HTML "
+            "(suffix: <code>patrol_trajectories</code>) and, like the other maps, "
+            "converted to PNG at 2× scale with a 40 s tile-load wait — PNG generation "
+            "is active for this map, not disabled."
         ),
 
         sp(4), h2("5.3 Linear Time Density Map"),
@@ -430,8 +435,13 @@ def build():
         sp(4), h2("6.2 Patrol Type Summary"),
         p(
             "The same three aggregations (no_of_patrols, total_distance, total_time) "
-            "are computed grouped by <code>patrol_type</code>. This shows comparative "
-            "effort across different patrol activity categories."
+            "are also computed grouped by <code>patrol_type</code> "
+            "(<code>summarized_patrol_types</code>)."
+        ),
+        note(
+            "This table is computed by the workflow but its output is never persisted "
+            "or wired into the dashboard or Word report — it is currently dead code in "
+            "<code>spec.yaml</code>."
         ),
 
         sp(4), h2("6.3 Event Type Summary"),
@@ -443,11 +453,10 @@ def build():
 
         sp(4), h2("6.4 Monthly Summary"),
         p(
-            "<code>extract_date_parts</code> extracts <code>month</code>, "
-            "<code>day</code>, and <code>month_name</code> from "
-            "<code>extra__patrol_start_time</code>. Patrol effort is then summarised "
-            "by <code>month_name</code> (no_of_patrols, total_distance, total_time) "
-            "to reveal seasonal patrol patterns."
+            "<code>decompose_datetime</code> extracts <code>month_name</code> from "
+            "<code>extra__patrol_start_time</code> (prefixed <code>time_</code>). Patrol "
+            "effort is then summarised by <code>time_month_name</code> (no_of_patrols, "
+            "total_distance, total_time) to reveal seasonal patrol patterns."
         ),
 
         sp(4), h2("6.5 Scalar Dashboard Widgets"),
@@ -497,29 +506,31 @@ def build():
 
         h2("8.1 Cover Page"),
         p(
-            "<code>create_guardians_ctx_cover</code> builds the cover context "
-            "(report period, <i>Ecoscope</i> as preparer). "
-            "<code>create_context_page_lg</code> renders it into "
-            "<code>context_page.docx</code> using the <code>patrol_guardians_cover_page.docx</code> "
+            "<code>prepare_cover_metadata</code> builds the cover context (org logo, "
+            "report period, <i>Ecoscope</i> as preparer, generation timestamp). "
+            "<code>create_context_page</code> renders it into "
+            "<code>cover_page.docx</code> using the <code>patrol_guardians_cover_page.docx</code> "
             "template."
         ),
 
         sp(4), h2("8.2 Per-Grouper Sections"),
         p(
-            "<code>guardians_ctx</code> assembles a context dict per group containing "
-            "maps (events map, trajectories map, time density map), charts (pie chart, "
-            "bar chart), and CSV data (monthly efforts, guardian event pivot, guardian "
-            "events, guardian patrol stats, event type efforts, trajectory DataFrame). "
-            "<code>generate_guardians_report</code> renders each section from the "
-            "<code>custom_patrol_template.docx</code> template. "
-            "Image boxes: <b>3.85 × 6.48 inches</b>. "
-            "<code>validate_images: true</code> catches missing PNGs before rendering."
+            "<code>create_guardians_context</code> assembles a context dict per group "
+            "containing maps (events map, trajectories map, time density map), charts "
+            "(pie chart, bar chart), and CSV data (monthly efforts, guardian event pivot, "
+            "guardian events, guardian patrol stats, event type efforts). "
+            "<code>render_docx_page</code> (from "
+            "<code>ecoscope_workflows_ext_lion_guardians</code>) renders each section "
+            "from the <code>custom_patrol_template.docx</code> template. "
+            "Image boxes: <b>9.779 × 16.4592 cm</b> (&asymp; 3.85 × 6.48 in). "
+            "<code>strict_images: true</code> catches missing PNGs before rendering."
         ),
 
         sp(4), h2("8.3 Document Merge"),
         p(
-            "<code>merge_cl_files</code> concatenates the cover page and all "
-            "per-grouper sections into a single Word file saved to the results directory."
+            "<code>merge_docx_documents</code> concatenates the cover page "
+            "(<code>cover_page.docx</code>) and all per-grouper sections, ordered by "
+            "name, into a single Word file: <code>overall_report.docx</code>."
         ),
     ]
 
@@ -570,15 +581,15 @@ def build():
                 [c("<group>_events.png"),                   c("PNG"),        c("2× screenshot of patrol events map")],
                 [c("<group>_time_density.png"),             c("PNG"),        c("2× screenshot of time density map")],
                 [c("<group>_patrols_pie_chart.png"),        c("PNG"),        c("2× screenshot of event type pie chart")],
-                [c("<group>_bar_chart.png"),                c("PNG"),        c("2× screenshot of events time series bar chart")],
+                [c("<group>_patrol_events_time_series_bar_chart.png"), c("PNG"), c("2× screenshot of events time series bar chart")],
                 [c("<group>_guardian_patrol.csv"),          c("CSV"),        c("Per-guardian patrol effort (patrols, distance, time)")],
                 [c("<group>_guardian_events.csv"),          c("CSV"),        c("Per-guardian event count")],
                 [c("<group>_pivot_guardian_events.csv"),    c("CSV"),        c("Guardian × event type pivot table")],
                 [c("<group>_event_types.csv"),              c("CSV"),        c("Per-event-type count")],
                 [c("<group>_monthly_patrol_efforts.csv"),   c("CSV"),        c("Monthly patrol effort summary")],
-                [c("context_page.docx"),                    c("Word"),       c("Rendered report cover page")],
+                [c("cover_page.docx"),                      c("Word"),       c("Rendered report cover page")],
                 [c("<group>.docx"),                         c("Word"),       c("Per-grouper report section")],
-                [c("<merged_report>.docx"),                 c("Word"),       c("Final combined Word report")],
+                [c("overall_report.docx"),                  c("Word"),       c("Final combined Word report")],
             ],
             [5.5*cm, 2.5*cm, 8.5*cm],
         ),
@@ -611,8 +622,8 @@ def build():
             [
                 [c("Stage"),              c("Tasks")],
                 [c("Setup"),              c("ER connection, time range, timezone, groupers, base maps")],
-                [c("Geodata download"),   c("2 boundary files + 2 Word templates from Dropbox")],
-                [c("Static layers"),      c("Ranch, hotspot, hotspot text layers")],
+                [c("Study area"),         c("Conservancies + Group Ranch Boundaries fetched live from EarthRanger")],
+                [c("Downloads"),          c("2 Word templates + org logo from Dropbox")],
                 [c("Patrol ingest"),      c("Params → prefetch → observations → events → rename → convert TZ")],
                 [c("Trajectories"),       c("Relocations → trajectories → temporal index → rename → split groups")],
                 [c("Events branch"),      c("Filter → temporal index → colormap → rename → outlier removal → scatter layer → map → HTML → PNG → widget")],
@@ -632,23 +643,22 @@ def build():
         sp(4), h1("12. Software Versions"), hr(),
         make_table(
             [
-                [c("Package"),                               c("Version"),    c("Role")],
-                [c("ecoscope-workflows-core"),               c("0.22.17.*"),  c("Core task library and workflow engine")],
-                [c("ecoscope-workflows-ext-ecoscope"),       c("0.22.17.*"),  c("Spatial analysis tasks (LTD, relocations, trajectories)")],
-                [c("ecoscope-workflows-ext-custom"),         c("0.0.40.*"),   c("Utility tasks (column mapping, screenshots, pivots)")],
-                [c("ecoscope-workflows-ext-ste"),            c("0.0.18.*"),   c("Summary table and aggregation tasks")],
-                [c("ecoscope-workflows-ext-mnc"),            c("0.0.7.*"),    c("Pivot table task (pivot_df)")],
-                [c("ecoscope-workflows-ext-icf"),            c("0.0.0.*"),    c("ICF domain tasks")],
-                [c("ecoscope-workflows-ext-big-life"),       c("0.0.8.*"),    c("Big Life Foundation domain tasks")],
-                [c("ecoscope-workflows-ext-lion-guardians"), c("0.0.6.*"),    c("Lion Guardians Word report rendering tasks")],
+                [c("Package"),                               c("Version"),                 c("Role")],
+                [c("ecoscope-platform"),                     c(">=2.15.0, &lt;2.16.0"),     c("Consolidated core task library and workflow engine")],
+                [c("ecoscope-workflows-ext-custom"),         c("0.1.0rc14.*"),              c("Utility tasks (maps, layers, column mapping)")],
+                [c("ecoscope-workflows-ext-ste"),            c("0.0.0rc1.*"),               c("Spatial operations tasks (EarthRanger features, view state)")],
+                [c("ecoscope-workflows-ext-lion-guardians"), c("0.0.0rc1.*"),               c("Lion Guardians domain tasks (daytime filter, Word rendering)")],
+                [c("pydeck"),                                c("0.9.2"),                    c("Deck.gl map rendering")],
+                [c("opentelemetry-sdk"),                     c(">=1.20.0, &lt;2.0.0"),      c("Observability/tracing")],
             ],
-            [6*cm, 2.5*cm, 8*cm],
+            [6*cm, 4*cm, 6.5*cm],
         ),
         sp(4),
         p(
-            "Packages are distributed via the <code>prefix.dev</code> conda channel "
-            "and pinned to patch-compatible versions (<code>.*</code> suffix). "
-            "The runtime environment is managed by <b>pixi</b>."
+            "This workflow has migrated to the consolidated <code>ecoscope-platform</code> "
+            "package scheme. Packages are distributed via the "
+            "<code>repo.prefix.dev</code> conda channels and pinned to compatible "
+            "version ranges. The runtime environment is managed by <b>pixi</b>."
         ),
     ]
 

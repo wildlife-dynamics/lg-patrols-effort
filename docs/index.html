@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LG Patrols Effort Workflow</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="bar">
+      <a class="brand" href="index.html">LG Patrols Effort</a>
+      <nav>
+        <a href="index.html" class="active">Overview</a>
+        <a href="user-guide.html">User Guide</a>
+        <a href="technical-guide.html">Technical Guide</a>
+        <a href="troubleshooting.html">Troubleshooting</a>
+        <a href="https://github.com/wildlife-dynamics/lg-patrols-effort">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <h1>LG Patrols Effort Workflow</h1>
+    <p class="lede">Generates a patrol effort analysis report for Lion Guardians rangers in the Amboseli ecosystem, sourced live from EarthRanger.</p>
+
+    <div class="card-grid">
+      <a class="card" href="user-guide.html">
+        <h3>User Guide</h3>
+        <p>Step-by-step instructions for loading, configuring, and running the workflow.</p>
+      </a>
+      <a class="card" href="technical-guide.html">
+        <h3>Technical Guide</h3>
+        <p>Deeper look at the workflow's internals — data pipeline, map/chart methodology, and report assembly.</p>
+      </a>
+      <a class="card" href="troubleshooting.html">
+        <h3>Troubleshooting</h3>
+        <p>Common errors you may hit while configuring or running the workflow, and how to resolve them.</p>
+      </a>
+    </div>
+
+    <h2>What it produces</h2>
+    <p>The workflow produces, for each patrol group:</p>
+    <ul>
+      <li>A <strong>Patrol Events map</strong> (scatter plot of events, coloured by event type)</li>
+      <li>A <strong>Patrol Trajectories map</strong> (tracks in a single fixed colour)</li>
+      <li>A <strong>Linear Time Density map</strong> (patrol coverage heat map)</li>
+      <li>A <strong>time series bar chart</strong> and <strong>pie chart</strong> of patrol events</li>
+      <li><strong>Summary CSV tables</strong> &mdash; per guardian, event type, and monthly breakdown</li>
+      <li>A <strong>Word document report</strong> (<code>.docx</code>) with a cover page and one section per group</li>
+      <li>An <strong>interactive widget dashboard</strong></li>
+    </ul>
+
+    <h2>Requirements</h2>
+    <ul>
+      <li>Access to an <strong>EarthRanger</strong> instance with a configured data source</li>
+      <li>The patrol types and event types you want to analyse (leave blank to include all)</li>
+    </ul>
+    <p>The two study-area boundaries (Conservancies and Group Ranch Boundaries) are fetched live from EarthRanger &mdash; no local files are required. Only the Word report templates and the organisation logo are downloaded automatically from Dropbox.</p>
+
+    <h2>Get started</h2>
+    <p>New to the workflow? Start with the <a href="user-guide.html">User Guide</a> for a walkthrough of loading the template, configuring groupers and patrol parameters, and running the report. Running into an error? Check <a href="troubleshooting.html">Troubleshooting</a> first.</p>
+  </main>
+
+  <footer class="site-footer">
+    <p>LG Patrols Effort Workflow &middot; <a href="https://github.com/wildlife-dynamics/lg-patrols-effort">wildlife-dynamics/lg-patrols-effort</a> on GitHub</p>
+  </footer>
+</body>
+</html>

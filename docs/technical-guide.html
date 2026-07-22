@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Technical Guide — LG Patrols Effort Workflow</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="bar">
+      <a class="brand" href="index.html">LG Patrols Effort</a>
+      <nav>
+        <a href="index.html">Overview</a>
+        <a href="user-guide.html">User Guide</a>
+        <a href="technical-guide.html" class="active">Technical Guide</a>
+        <a href="troubleshooting.html">Troubleshooting</a>
+        <a href="https://github.com/wildlife-dynamics/lg-patrols-effort">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <h1>Technical Guide</h1>
+    <p class="lede">A deeper look at how the LG Patrols Effort Workflow is built: the EarthRanger ingestion pipeline, map and chart methodology, summary metrics, and report assembly.</p>
+
+    <p>
+      <a href="assets/lg_patrols_effort_technical_guide.pdf">Download the full Technical Guide (PDF)</a>
+    </p>
+    <p>This guide was cross-checked line-by-line against <code>spec.yaml</code>. Several claims in the previous version were inaccurate &mdash; most notably, the study-area boundaries are fetched <strong>live from EarthRanger</strong> (not downloaded from Dropbox as a Conflict Hotspots + Group Ranch Boundaries pair), patrol trajectories use a single <strong>fixed colour</strong> rather than a user-selectable colour category, and several task names and a cover-page filename were wrong. This workflow has also migrated to the consolidated <code>ecoscope-platform</code> package.</p>
+
+    <h2>Contents</h2>
+    <ol>
+      <li>Overview</li>
+      <li>Dependencies &amp; Prerequisites
+        <ol type="a">
+          <li>EarthRanger Connection</li>
+          <li>Groupers</li>
+          <li>Study Area Layers</li>
+          <li>Word Document Templates &amp; Logo</li>
+          <li>Base Map Tile Layers</li>
+        </ol>
+      </li>
+      <li>Data Ingestion Pipeline
+        <ol type="a">
+          <li>Patrol Observations &rarr; Relocations &rarr; Trajectories</li>
+          <li>Patrol Events</li>
+          <li>Temporal Index &amp; Column Renaming</li>
+          <li>Trajectory Colour &amp; Event Colormap</li>
+        </ol>
+      </li>
+      <li>Static Map Layers
+        <ol type="a"><li>Layer Styles</li></ol>
+      </li>
+      <li>Map Outputs &mdash; Methodology
+        <ol type="a">
+          <li>Patrol Events Map</li>
+          <li>Patrol Trajectories Map</li>
+          <li>Linear Time Density Map</li>
+        </ol>
+      </li>
+      <li>Summary Metrics
+        <ol type="a">
+          <li>Per-Guardian Statistics</li>
+          <li>Patrol Type Summary</li>
+          <li>Event Type Summary</li>
+          <li>Monthly Summary</li>
+          <li>Scalar Dashboard Widgets</li>
+        </ol>
+      </li>
+      <li>Event Charts
+        <ol type="a">
+          <li>Time Series Bar Chart</li>
+          <li>Pie Chart</li>
+        </ol>
+      </li>
+      <li>Word Report (.docx)
+        <ol type="a">
+          <li>Cover Page</li>
+          <li>Per-Grouper Sections</li>
+          <li>Document Merge</li>
+        </ol>
+      </li>
+      <li>Interactive Dashboard</li>
+      <li>Output Files</li>
+      <li>Workflow Execution Logic
+        <ol type="a">
+          <li>Skip Conditions</li>
+          <li>Data Flow Summary</li>
+        </ol>
+      </li>
+      <li>Software Versions</li>
+    </ol>
+
+    <h2>Read it here</h2>
+    <p>The guide is embedded below. If it doesn't render in your browser, use the download link above.</p>
+    <embed src="assets/lg_patrols_effort_technical_guide.pdf" type="application/pdf" width="100%" height="900px" style="border: 1px solid #d8e8d8; border-radius: 6px;" />
+  </main>
+
+  <footer class="site-footer">
+    <p>LG Patrols Effort Workflow &middot; <a href="https://github.com/wildlife-dynamics/lg-patrols-effort">wildlife-dynamics/lg-patrols-effort</a> on GitHub</p>
+  </footer>
+</body>
+</html>

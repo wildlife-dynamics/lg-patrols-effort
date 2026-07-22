@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Troubleshooting — LG Patrols Effort Workflow</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="bar">
+      <a class="brand" href="index.html">LG Patrols Effort</a>
+      <nav>
+        <a href="index.html">Overview</a>
+        <a href="user-guide.html">User Guide</a>
+        <a href="technical-guide.html">Technical Guide</a>
+        <a href="troubleshooting.html" class="active">Troubleshooting</a>
+        <a href="https://github.com/wildlife-dynamics/lg-patrols-effort">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <h1>Troubleshooting</h1>
+    <p class="lede">Common issues encountered while configuring, running, or contributing to the LG Patrols Effort Workflow, and how to resolve them. If your issue isn't listed here, open an issue on <a href="https://github.com/wildlife-dynamics/lg-patrols-effort/issues">GitHub</a>.</p>
+
+    <h2>Configuration &amp; EarthRanger Connection</h2>
+
+    <div class="error-block">
+      <p class="symptom">Study area layers (Conservancies, Group Ranch Boundaries) are missing from every map</p>
+      <p>These layers are <strong>not</strong> bundled with the workflow &mdash; they are fetched live via <code>get_spatial_features</code>, querying the <code>Conservancies</code> and <code>Group Ranch Boundaries</code> feature types on the connected EarthRanger instance. If either feature type does not exist (or is named differently) on your instance, that layer is silently absent from the composited maps rather than raising an error.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom">No patrols or events are returned</p>
+      <p>By default, <a href="user-guide.html#patrol-params">Patrol Types</a> is restricted to <code>routine_patrol</code> and, under Advanced Configurations, patrol status is restricted to <code>done</code>. If your EarthRanger instance records other patrol types or statuses, clear or expand these filters.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom">Events near the edge of the ecosystem are missing</p>
+      <p>The <a href="user-guide.html#event-filter">Filter Patrol Events</a> bounding box is pre-filled to the Amboseli ecosystem extent by default. Events outside that box are excluded even if they fall within the selected time range. Clear the bounding box to include all events regardless of location.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom">Patrol Trajectories map shows every track the same colour</p>
+      <p>This is expected &mdash; unlike the Patrol Events map (which colours points by <code>event_type</code>), the Patrol Trajectories map always renders tracks in a single fixed colour (<code>#008b8b</code>). There is no user-selectable colour category for this map in the current workflow version.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom">A patrol track segment is missing even though the patrol appears in the events map</p>
+      <p>Trajectory segments are dropped by the <a href="user-guide.html#segment-filter">segment filter</a> if they're shorter than 10 m or 10 s, longer than 100 km or 6 hours, or average slower than 1 km/h or faster than 7 km/h (the 7 km/h ceiling assumes foot patrols &mdash; a genuinely fast foot segment can be excluded). A daytime filter also drops any fix recorded outside 06:00&ndash;19:00 local time.</p>
+    </div>
+
+    <h2>Reports &amp; Dashboard</h2>
+
+    <div class="error-block">
+      <p class="symptom">Can't find a patrol-type breakdown CSV in the output directory</p>
+      <p>A patrol-type summary (<code>summarized_patrol_types</code>) is computed internally but its result is never persisted to a CSV or wired into the Word report or dashboard &mdash; this is a gap in the current <code>spec.yaml</code>, not a run failure. If you need this breakdown, use the <strong>Patrol Type</strong> grouper instead, which produces a full per-type set of outputs.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom">Word report is missing images or fails to render</p>
+      <p><code>render_docx_page</code> runs with <code>strict_images: true</code>, so a missing PNG for any group (e.g. because that group's map/chart was skipped due to an empty DataFrame) will raise an error rather than silently leaving a blank box.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom">No outputs written / can't find results</p>
+      <p>All outputs are written to the directory specified by the <code>ECOSCOPE_WORKFLOWS_RESULTS</code> environment variable. Confirm it's set and points to a directory the workflow process can write to.</p>
+    </div>
+
+    <h2>Contributing &amp; CI</h2>
+    <p>These apply if you're modifying the workflow itself (<code>spec.yaml</code>, <code>test-cases.yaml</code>, or the generated <code>ecoscope-workflows-patrols-workflow/</code> directory) and opening a pull request.</p>
+
+    <div class="error-block">
+      <p class="symptom"><code>Generated files differ from committed files in ecoscope-workflows-patrols-workflow</code></p>
+      <p>The generated workflow directory is out of sync with <code>spec.yaml</code>. Run the recompile script locally and commit the result:</p>
+      <pre><code>pixi run --manifest-path pixi.toml --locked bash -c "./dev/recompile.sh --update"</code></pre>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom"><code>Found wildcard version (*) in requirements</code> or <code>Found local file channel (file://) in requirements</code></p>
+      <p>In <code>spec.yaml</code>, every dependency under <code>requirements</code> must pin an exact version (or version range) and use a remote conda channel &mdash; wildcard versions and local <code>file://</code> channels are only valid for local development, not for CI using published packages. This workflow already runs on the consolidated <code>ecoscope-platform</code> package &mdash; don't reintroduce the older <code>ecoscope-workflows-core</code>/<code>ecoscope-workflows-ext-ecoscope</code> split when editing it.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom"><code>VERSION.yaml (...) must be greater than main branch (...)</code></p>
+      <p>Bump <code>MAJ</code>/<code>MIN</code>/<code>PATCH</code> in <code>ecoscope-workflows-patrols-workflow/VERSION.yaml</code> so it's strictly greater than the version on <code>main</code> before opening or updating a PR.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom"><code>test-cases.yaml must contain at least one test case</code></p>
+      <p>Every workflow requires at least one top-level entry in <code>test-cases.yaml</code> with a <code>params</code> block. See the existing entries in that file for the expected format.</p>
+    </div>
+
+    <div class="error-block">
+      <p class="symptom">Workflow tests fail in CI but pass locally (or vice versa)</p>
+      <p><code>test.yml</code> runs test cases against all of <code>ubuntu-latest</code>, <code>macos-latest</code>, and <code>windows-latest</code>. Since this workflow depends on a live EarthRanger connection and Dropbox downloads (Word templates, org logo), a CI-only failure is more likely to come from those external services being unreachable or rate-limited than from OS-specific behaviour.</p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>LG Patrols Effort Workflow &middot; <a href="https://github.com/wildlife-dynamics/lg-patrols-effort">wildlife-dynamics/lg-patrols-effort</a> on GitHub</p>
+  </footer>
+</body>
+</html>

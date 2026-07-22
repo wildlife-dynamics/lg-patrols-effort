@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Guide — LG Patrols Effort Workflow</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="bar">
+      <a class="brand" href="index.html">LG Patrols Effort</a>
+      <nav>
+        <a href="index.html">Overview</a>
+        <a href="user-guide.html" class="active">User Guide</a>
+        <a href="technical-guide.html">Technical Guide</a>
+        <a href="troubleshooting.html">Troubleshooting</a>
+        <a href="https://github.com/wildlife-dynamics/lg-patrols-effort">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <h1>LG Patrols Effort Workflow &mdash; User Guide</h1>
+    <p class="lede">This guide walks you through loading, configuring, and running the LG Patrols Effort Workflow, which generates a patrol effort analysis report for Lion Guardians rangers in the Amboseli ecosystem sourced from EarthRanger.</p>
+
+    <h2>What it produces</h2>
+    <ul>
+      <li>A <strong>Patrol Events map</strong> (scatter plot of events, coloured by event type)</li>
+      <li>A <strong>Patrol Trajectories map</strong> (tracks in a single fixed colour)</li>
+      <li>A <strong>Linear Time Density map</strong> (patrol coverage heat map)</li>
+      <li>A <strong>time series bar chart</strong> and <strong>pie chart</strong> of patrol events</li>
+      <li><strong>Summary CSV tables</strong> &mdash; per guardian, event type, and monthly breakdown</li>
+      <li>A <strong>Word document report</strong> (<code>.docx</code>) with a cover page and one section per group</li>
+      <li>An <strong>interactive widget dashboard</strong></li>
+    </ul>
+
+    <h2>Requirements</h2>
+    <ul>
+      <li>Access to an <strong>EarthRanger</strong> instance with a configured data source</li>
+      <li>The patrol types and event types you want to analyse (leave blank to include all)</li>
+    </ul>
+    <p>The two study-area boundaries (Conservancies and Group Ranch Boundaries) are fetched live from EarthRanger &mdash; no local files are required. Only the Word report templates and the organisation logo are downloaded automatically from Dropbox.</p>
+
+    <h2 id="load">1. Load the Workflow</h2>
+    <p>In the workflow runner, go to <strong>Workflow Templates</strong> and click <strong>Add Workflow Template</strong>. Paste this repository's URL into the <strong>Github Link</strong> field, then click <strong>Add Template</strong>:</p>
+    <pre><code>https://github.com/wildlife-dynamics/lg-patrols-effort.git</code></pre>
+    <p>Once added, it appears in the <strong>Workflow Templates</strong> list as <strong>lg-patrols-effort</strong>. Click it to open the workflow configuration form.</p>
+    <p>The card may show <strong>Initializing&hellip;</strong> briefly while the environment is set up.</p>
+    <p>You'll also need an <strong>EarthRanger data source connection</strong> configured beforehand (via <strong>Data Sources</strong> in the runner) &mdash; patrol tracks and events are pulled live from EarthRanger, so a connection is required before this workflow can run.</p>
+
+    <h2 id="configure">2. Configure the Workflow</h2>
+
+    <h3 id="workflow-details">Workflow Details and Time Range</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Workflow Name</td><td>A short name to identify this run</td></tr>
+        <tr><td>Workflow Description</td><td>Optional notes about the run (e.g. date range or patrol group)</td></tr>
+      </tbody>
+    </table>
+    <h4 id="time-range">Time range</h4>
+    <table>
+      <thead><tr><th>Field</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Timezone</td><td>Select the local timezone (e.g. <code>Africa/Nairobi UTC+03:00</code>)</td></tr>
+        <tr><td>Since</td><td>Start date and time of the analysis period</td></tr>
+        <tr><td>Until</td><td>End date and time of the analysis period</td></tr>
+      </tbody>
+    </table>
+    <p>All patrol tracks, events, and metrics are computed within this window.</p>
+
+    <h3 id="groupers">Groupers</h3>
+    <p>Groupers control how the workflow partitions data for per-group outputs. <strong>Left blank by default</strong> &mdash; all data appears in a single combined view. Click <strong>Add</strong> to add a grouper:</p>
+    <table>
+      <thead><tr><th>Grouper</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td>Patrol Type</td><td>One map, metrics, and report section per patrol type</td></tr>
+        <tr><td>Patrol Serial Number</td><td>One output per patrol serial</td></tr>
+        <tr><td>Patrol Status</td><td>One output per patrol status (e.g. done)</td></tr>
+        <tr><td>Patrol Subject</td><td>One output per guardian ranger</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="earthranger">Connect to EarthRanger</h3>
+    <p>Select the EarthRanger data source configured for this environment from the <strong>Connect to EarthRanger</strong> dropdown. Patrol tracks, patrol events, and the two study-area boundary layers (Conservancies and Group Ranch Boundaries) are all fetched live from this connection &mdash; there is no offline/local-file mode for this workflow.</p>
+
+    <h3 id="patrol-params">Patrol and Patrol Event Parameters</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Patrol Types</td><td>Filter to specific patrol types &mdash; defaults to <code>routine_patrol</code> only</td></tr>
+        <tr><td>Event Types</td><td>Filter to specific event types (leave empty to include all)</td></tr>
+        <tr><td>Include Events Without a Geometry</td><td>Check to include events with no point or polygon location &mdash; excluded by default</td></tr>
+      </tbody>
+    </table>
+    <p>Expand <strong>Advanced Configurations</strong> to access additional query parameters, including patrol status (defaults to <code>done</code> patrols only) and date-range overlap behaviour.</p>
+
+    <h3 id="basemap">Basemap Layers</h3>
+    <p>Two stacked ArcGIS tile layers form the background of every map. Pre-filled with sensible defaults, but the URL, opacity, and max zoom of each layer are editable.</p>
+    <table>
+      <thead><tr><th>Layer</th><th>Default Opacity</th><th>Max Zoom</th></tr></thead>
+      <tbody>
+        <tr><td>ESRI World Hillshade</td><td><code>1.0</code></td><td><code>20</code></td></tr>
+        <tr><td>ESRI World Street Map</td><td><code>0.15</code></td><td><code>20</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="segment-filter">Trajectory Segment Filter <em>(Advanced Configurations)</em></h3>
+    <p>These parameters remove GPS noise and biologically unrealistic movements before trajectory analysis. Patrol tracks are always rendered in a single fixed colour &mdash; there is no user-selectable colour category for this map.</p>
+    <table>
+      <thead><tr><th>Field</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Minimum Segment Length (m)</td><td><code>10</code></td><td>Discard segments shorter than this distance</td></tr>
+        <tr><td>Maximum Segment Length (m)</td><td><code>100000</code></td><td>Discard segments longer than this distance</td></tr>
+        <tr><td>Minimum Segment Duration (s)</td><td><code>10</code></td><td>Discard segments shorter than this duration</td></tr>
+        <tr><td>Maximum Segment Duration (s)</td><td><code>21600</code></td><td>Discard segments longer than this duration (6 hours)</td></tr>
+        <tr><td>Minimum Segment Speed (km/h)</td><td><code>1</code></td><td>Discard segments below this average speed</td></tr>
+        <tr><td>Maximum Segment Speed (km/h)</td><td><code>7</code></td><td>Discard segments above this average speed</td></tr>
+      </tbody>
+    </table>
+    <p>A daytime filter also restricts patrol fixes to between <strong>06:00 and 19:00</strong> local time, excluding night-time GPS drift.</p>
+
+    <h3 id="event-filter">Filter Patrol Events <em>(Advanced Configurations)</em></h3>
+    <p>Restricts events to a bounding box, pre-filled by default to the Amboseli ecosystem extent. Clear it to include all events within the time range regardless of location.</p>
+
+    <h3 id="time-frequency">Time Series Bar Chart</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Time Interval</td><td>The time bucket used to group events on the x-axis (e.g. day, week, month)</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="ltd-meshgrid">Linear Time Density Meshgrid <em>(Advanced Configurations)</em></h3>
+    <p>Controls the resolution of the patrol coverage raster. Leave at defaults for most analyses.</p>
+
+    <h2 id="run">3. Run the Workflow</h2>
+    <p>Once all parameters are configured, click <strong>Submit</strong>. The runner will:</p>
+    <ol>
+      <li>Pull patrol tracks and events from EarthRanger for the specified time range.</li>
+      <li>Fetch the Conservancies and Group Ranch Boundaries study-area layers live from EarthRanger.</li>
+      <li>Convert observations to relocations and build trajectory segments.</li>
+      <li>Generate the Patrol Events, Patrol Trajectories, and Linear Time Density maps.</li>
+      <li>Compute per-guardian, event type, and monthly summary tables.</li>
+      <li>Render the time series bar chart and pie chart.</li>
+      <li>Assemble the Word report (cover page + per-group sections) and the dashboard.</li>
+      <li>Save all outputs to the directory specified by <code>ECOSCOPE_WORKFLOWS_RESULTS</code>.</li>
+    </ol>
+
+    <h3 id="output-files">Output Files</h3>
+    <p>All outputs are written to <code>$ECOSCOPE_WORKFLOWS_RESULTS/</code>:</p>
+    <table>
+      <thead><tr><th>File</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>events.geoparquet</code></td><td>Patrol events with display names and timezone-converted timestamps</td></tr>
+        <tr><td><code>trajectories.geoparquet</code></td><td>Patrol segments with speed and distance</td></tr>
+        <tr><td><code>&lt;group&gt;_events.html</code></td><td>Interactive patrol events map per group</td></tr>
+        <tr><td><code>&lt;group&gt;_patrol_trajectories.html</code></td><td>Interactive patrol trajectories map per group</td></tr>
+        <tr><td><code>&lt;group&gt;_time_density.html</code></td><td>Interactive linear time density map per group</td></tr>
+        <tr><td><code>&lt;group&gt;_events.png</code></td><td>Screenshot of the patrol events map (2&times; resolution)</td></tr>
+        <tr><td><code>&lt;group&gt;_patrol_trajectories.png</code></td><td>Screenshot of the patrol trajectories map (2&times; resolution)</td></tr>
+        <tr><td><code>&lt;group&gt;_time_density.png</code></td><td>Screenshot of the time density map (2&times; resolution)</td></tr>
+        <tr><td><code>&lt;group&gt;_patrols_pie_chart.png</code></td><td>Screenshot of the event type pie chart (2&times; resolution)</td></tr>
+        <tr><td><code>&lt;group&gt;_patrol_events_time_series_bar_chart.png</code></td><td>Screenshot of the events time series bar chart (2&times; resolution)</td></tr>
+        <tr><td><code>&lt;group&gt;_guardian_patrol.csv</code></td><td>Per-guardian patrol effort (patrols, distance, time)</td></tr>
+        <tr><td><code>&lt;group&gt;_guardian_events.csv</code></td><td>Per-guardian event count</td></tr>
+        <tr><td><code>&lt;group&gt;_pivot_guardian_events.csv</code></td><td>Guardian &times; event type pivot table</td></tr>
+        <tr><td><code>&lt;group&gt;_monthly_patrol_efforts.csv</code></td><td>Monthly patrol effort summary</td></tr>
+        <tr><td><code>&lt;group&gt;_event_types.csv</code></td><td>Per-event-type count</td></tr>
+        <tr><td><code>cover_page.docx</code></td><td>Rendered report cover page</td></tr>
+        <tr><td><code>&lt;group&gt;.docx</code></td><td>Per-grouper report section</td></tr>
+        <tr><td><code>overall_report.docx</code></td><td>Final combined Word report</td></tr>
+      </tbody>
+    </table>
+    <p>A patrol-type summary is computed internally (<code>summarized_patrol_types</code>) but is not currently persisted to a CSV or wired into the report/dashboard.</p>
+
+    <p>Something not working as expected? See <a href="troubleshooting.html">Troubleshooting</a>. For a deeper look at the pipeline internals, see the <a href="technical-guide.html">Technical Guide</a>.</p>
+  </main>
+
+  <footer class="site-footer">
+    <p>LG Patrols Effort Workflow &middot; <a href="https://github.com/wildlife-dynamics/lg-patrols-effort">wildlife-dynamics/lg-patrols-effort</a> on GitHub</p>
+  </footer>
+</body>
+</html>
