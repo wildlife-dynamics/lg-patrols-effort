@@ -1274,7 +1274,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .partial(
             raise_if_not_found=True,
             drop_columns=[],
-            duplicate_strategy=None,
+            duplicate_strategy="suffix",
             retain_columns=[
                 "speed_kmhr",
                 "geometry",
