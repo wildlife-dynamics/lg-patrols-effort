@@ -1058,7 +1058,7 @@ workflow:
     partial:
       raise_if_not_found: true
       drop_columns: []
-      duplicate_strategy: null
+      duplicate_strategy: suffix
       retain_columns:
         - geometry
         - percentile
