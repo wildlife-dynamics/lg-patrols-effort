@@ -52,21 +52,28 @@ from ecoscope.platform.tasks.preprocessing import (
 from ecoscope.platform.tasks.preprocessing import (
     relocations_to_trajectory as relocations_to_trajectory,
 )
+from ecoscope.platform.tasks.results import create_geojson_layer as create_geojson_layer
 from ecoscope.platform.tasks.results import (
     create_map_widget_single_view as create_map_widget_single_view,
 )
+from ecoscope.platform.tasks.results import create_path_layer as create_path_layer
 from ecoscope.platform.tasks.results import (
     create_plot_widget_single_view as create_plot_widget_single_view,
 )
 from ecoscope.platform.tasks.results import (
+    create_scatterplot_layer as create_scatterplot_layer,
+)
+from ecoscope.platform.tasks.results import (
     create_single_value_widget_single_view as create_single_value_widget_single_view,
 )
+from ecoscope.platform.tasks.results import draw_map as draw_map
 from ecoscope.platform.tasks.results import draw_pie_chart as draw_pie_chart
 from ecoscope.platform.tasks.results import (
     draw_time_series_bar_chart as draw_time_series_bar_chart,
 )
 from ecoscope.platform.tasks.results import gather_dashboard as gather_dashboard
 from ecoscope.platform.tasks.results import merge_widget_views as merge_widget_views
+from ecoscope.platform.tasks.results import set_base_maps as set_base_maps
 from ecoscope.platform.tasks.skip import all_geometry_are_none as all_geometry_are_none
 from ecoscope.platform.tasks.skip import (
     any_dependency_skipped as any_dependency_skipped,
@@ -90,6 +97,12 @@ from ecoscope.platform.tasks.transformation import (
     convert_values_to_timezone as convert_values_to_timezone,
 )
 from ecoscope.platform.tasks.transformation import (
+    decompose_datetime as decompose_datetime,
+)
+from ecoscope.platform.tasks.transformation import (
+    drop_column_prefix as drop_column_prefix,
+)
+from ecoscope.platform.tasks.transformation import (
     drop_nan_values_by_column as drop_nan_values_by_column,
 )
 from ecoscope.platform.tasks.transformation import map_columns as map_columns
@@ -99,25 +112,6 @@ from ecoscope.platform.tasks.transformation import (
 from ecoscope.platform.tasks.transformation import sort_values as sort_values
 from ecoscope.platform.tasks.transformation import with_unit as with_unit
 from ecoscope_workflows_ext_custom.tasks.io import html_to_png as html_to_png
-from ecoscope_workflows_ext_custom.tasks.results import (
-    create_geojson_layer as create_geojson_layer_1,
-)
-from ecoscope_workflows_ext_custom.tasks.results import (
-    create_path_layer as create_path_layer_1,
-)
-from ecoscope_workflows_ext_custom.tasks.results import (
-    create_scatterplot_layer as create_scatterplot_layer_1,
-)
-from ecoscope_workflows_ext_custom.tasks.results import draw_map as draw_map_1
-from ecoscope_workflows_ext_custom.tasks.results import (
-    set_base_maps_pydeck as set_base_maps_pydeck,
-)
-from ecoscope_workflows_ext_custom.tasks.transformation import (
-    decompose_datetime as decompose_datetime,
-)
-from ecoscope_workflows_ext_custom.tasks.transformation import (
-    drop_column_prefix as drop_column_prefix,
-)
 from ecoscope_workflows_ext_custom.tasks.transformation import (
     pivot_dataframe as pivot_dataframe,
 )
@@ -143,7 +137,7 @@ from ecoscope_workflows_ext_ste.tasks.reporting import (
     prepare_cover_metadata as prepare_cover_metadata,
 )
 from ecoscope_workflows_ext_ste.tasks.results import (
-    create_spatial_features_layer as create_spatial_features_layer,
+    create_spatial_features_layer as create_spatial_features_layer_1,
 )
 from ecoscope_workflows_ext_ste.tasks.spatial_operations import (
     combine_deckgl_map_layers as combine_deckgl_map_layers,
@@ -155,7 +149,7 @@ from ecoscope_workflows_ext_ste.tasks.spatial_operations import (
     envelope_gdf as envelope_gdf,
 )
 from ecoscope_workflows_ext_ste.tasks.spatial_operations import (
-    get_spatial_features as get_spatial_features,
+    get_spatial_features as get_spatial_features_1,
 )
 from wt_contracts import validate as _validate
 from wt_task import task
@@ -253,7 +247,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     base_map_defs = (
-        task(set_base_maps_pydeck)
+        task(set_base_maps)
         .validate()
         .set_task_instance_id("base_map_defs")
         .handle_errors()
@@ -284,7 +278,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     select_geo_er = (
-        task(get_spatial_features)
+        task(get_spatial_features_1)
         .validate()
         .set_task_instance_id("select_geo_er")
         .handle_errors()
@@ -339,7 +333,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     spatial_features_layer = (
-        task(create_spatial_features_layer)
+        task(create_spatial_features_layer_1)
         .validate()
         .set_task_instance_id("spatial_features_layer")
         .handle_errors()
@@ -430,6 +424,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             sub_page_size=200,
             patrols_overlap_daterange=False,
             patrol_types=["routine_patrol"],
+            event_states=None,
             **(params.get("er_patrol_and_events_params") or {}),
         )
         .call()
@@ -718,6 +713,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             df=traj_add_temporal_index,
             drop_columns=[],
             retain_columns=[],
+            duplicate_strategy="suffix",
             rename_columns={
                 "extra__patrol_type__value": "patrol_type",
                 "extra__patrol_serial_number": "patrol_serial_number",
@@ -744,7 +740,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-            filetype="geoparquet",
+            filetype="gpkg",
             df=traj_rename_grouper_columns,
             filename="trajectories",
             **(params.get("persist_patrols_geoparquet") or {}),
@@ -1019,6 +1015,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             raise_if_not_found=True,
             drop_columns=[],
             retain_columns=[],
+            duplicate_strategy="suffix",
             rename_columns={
                 "patrol_serial_number": "Patrol Serial",
                 "serial_number": "Event Serial",
@@ -1031,7 +1028,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     patrol_events_map_layers = (
-        task(create_scatterplot_layer_1)
+        task(create_scatterplot_layer)
         .validate()
         .set_task_instance_id("patrol_events_map_layers")
         .handle_errors()
@@ -1046,6 +1043,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             data_url=None,
+            tooltip_columns=None,
             layer_style={
                 "get_fill_color": "event_type_colormap",
                 "get_line_color": [0, 0, 0, 200],
@@ -1142,7 +1140,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     draw_events = (
-        task(draw_map_1)
+        task(draw_map)
         .validate()
         .set_task_instance_id("draw_events")
         .handle_errors()
@@ -1161,6 +1159,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             max_zoom=10,
             widget_id=set_event_map_title,
             legend_style={"placement": "bottom-right"},
+            output_type="html",
             **(params.get("draw_events") or {}),
         )
         .mapvalues(
@@ -1255,6 +1254,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .partial(
             raise_if_not_found=True,
             drop_columns=[],
+            duplicate_strategy=None,
             retain_columns=[
                 "speed_kmhr",
                 "geometry",
@@ -1279,7 +1279,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     patrol_traj_map_layers = (
-        task(create_path_layer_1)
+        task(create_path_layer)
         .validate()
         .set_task_instance_id("patrol_traj_map_layers")
         .handle_errors()
@@ -1294,6 +1294,13 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             data_url=None,
+            tooltip_columns=[
+                "Patrol Serial",
+                "Patrol Type",
+                "Start",
+                "Duration (s)",
+                "Speed (kph)",
+            ],
             layer_style={
                 "get_color": [0, 139, 139],
                 "get_width": 2.25,
@@ -1357,7 +1364,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     trajs_ecomap = (
-        task(draw_map_1)
+        task(draw_map)
         .validate()
         .set_task_instance_id("trajs_ecomap")
         .handle_errors()
@@ -1375,6 +1382,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             static=False,
             title=None,
             max_zoom=10,
+            output_type="html",
             widget_id=set_traj_map_title,
             **(params.get("trajs_ecomap") or {}),
         )
@@ -2191,6 +2199,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .partial(
             raise_if_not_found=True,
             drop_columns=[],
+            duplicate_strategy=None,
             retain_columns=["geometry", "percentile", "percentile_colormap"],
             rename_columns={"percentile": "Percentile"},
             **(params.get("patrol_td_rename_columns") or {}),
@@ -2199,7 +2208,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     td_map_layer = (
-        task(create_geojson_layer_1)
+        task(create_geojson_layer)
         .validate()
         .set_task_instance_id("td_map_layer")
         .handle_errors()
@@ -2214,6 +2223,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             data_url=None,
+            tooltip_columns=["percentile", "percentile_colormap"],
             layer_style={
                 "get_fill_color": "percentile_colormap",
                 "get_line_color": "percentile_colormap",
@@ -2281,7 +2291,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
     )
 
     td_ecomap = (
-        task(draw_map_1)
+        task(draw_map)
         .validate()
         .set_task_instance_id("td_ecomap")
         .handle_errors()
@@ -2299,6 +2309,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             static=False,
             title=None,
             max_zoom=10,
+            output_type="html",
             widget_id=set_ltd_map_title,
             **(params.get("td_ecomap") or {}),
         )
