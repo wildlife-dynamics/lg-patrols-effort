@@ -5,15 +5,15 @@ requirements:
     channel: https://repo.prefix.dev/ecoscope-workflows/
 
   - name: ecoscope-workflows-ext-custom
-    version: "0.1.4.*"
+    version: "0.1.4"
     channel: https://repo.prefix.dev/ecoscope-workflows-custom/
 
   - name: ecoscope-workflows-ext-ste
-    version: "0.0.24.*"
+    version: "0.0.27"
     channel: https://repo.prefix.dev/ecoscope-workflows-custom/
 
   - name: ecoscope-workflows-ext-lion-guardians
-    version: "0.0.8.*"
+    version: "0.0.9"
     channel: https://repo.prefix.dev/ecoscope-workflows-custom/
     
   - name: pydeck
@@ -106,25 +106,17 @@ workflow:
     partial:
       geodataframes: ${{ workflow.select_geo_er.return }}
 
-  - name: Download guardians report cover page
+  - name: Load packaged guardians report cover page
     id: persist_cover_page
-    task: fetch_and_persist_file
+    task: ecoscope_workflows_ext_lion_guardians.tasks.io.load_lion_guardians_file
     partial:
-      url: https://www.dropbox.com/scl/fi/p1xk9no77w9ctpc4mnn6p/patrol_guardians_cover_page.docx?rlkey=tc5oo54s29wu7cz47glvlbcaj&st=rtwbfa0i&dl=0
-      output_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      overwrite_existing: false
-      retries: 3
-      unzip: false
+      filename: patrol_guardians_cover_page.docx
 
-  - name: Download guardians report  subject page
+  - name: Load packaged guardians report  subject page
     id: persist_indv_subject_page
-    task: fetch_and_persist_file
+    task: ecoscope_workflows_ext_lion_guardians.tasks.io.load_lion_guardians_file
     partial:
-      url: https://www.dropbox.com/scl/fi/kp9mkc9dd5qbast86ufk4/custom_patrol_template.docx?rlkey=ea12bxesuu9dnnj1ngfahhqvr&st=w7q7uf3l&dl=0
-      output_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      overwrite_existing: false
-      retries: 3
-      unzip: false
+      filename: custom_patrol_template.docx
 
   # Retrieve done and only routine patrols
   - name: Set patrol and patrol events params
@@ -1464,15 +1456,11 @@ workflow:
       argnames: html_path
       argvalues: ${{ workflow.patrol_events_bar_chart_html_url.return }}
 
-  - name: Download org log path
+  - name: Load packaged org log path
     id: persist_logo
-    task: ecoscope_workflows_ext_ste.tasks.io.fetch_and_persist_file
+    task: ecoscope_workflows_ext_lion_guardians.tasks.io.load_lion_guardians_file
     partial:
-      url: https://www.dropbox.com/scl/fi/8oohb6i0kcj0q3qsud9l4/lion-guardians.png?rlkey=4kdqytux2qyftb5sgnaigyuyz&st=os6i6j6h&dl=0
-      output_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      overwrite_existing: false
-      retries: 3
-      unzip: false
+      filename: lion-guardians.png
 
   - name: Create context cover page
     id: context_cover_page
@@ -1563,6 +1551,13 @@ workflow:
       filename: overall_report.docx
       order_by: name
 
+  - name: Report files
+    id: report_files
+    task: create_files_single_view
+    partial:
+      files:
+        - ${{ workflow.merge_docx.return }}
+
   - name: Create Dashboard with Patrol Map Widgets
     id: patrol_dashboard
     task: gather_dashboard
@@ -1584,3 +1579,4 @@ workflow:
 
       groupers: ${{ workflow.groupers.return }}
       time_range: ${{ workflow.time_range.return}}
+      files: ${{ workflow.report_files.return }}
