@@ -6,7 +6,7 @@
 ```yaml
 # fingerprint:
 artifacts_sha256_basic: bfc920a2bd642cd6468efb85bf6573a71a274b748dbb1eef6e1aef239480fb6c
-artifacts_sha256_strict: bae8e320ab6f861f20c1b41f9885cff9bf53b647b770acbe32d09a85a4666ef5
+artifacts_sha256_strict: c28638f0d1f8061c510b9b29b4905ef5c58caa5b7f1ec590363c1f5b9a3da0c5
 installed_requirements:
 - channel: https://repo.prefix.dev/ecoscope-workflows/
   name: ecoscope-platform
